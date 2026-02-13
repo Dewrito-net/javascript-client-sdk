@@ -969,7 +969,17 @@ export async function handleEvent(
       break;
     }
     case "VoiceChannelMove": {
-      // todo
+      const fromChannel = client.channels.getOrPartial(event.from);
+      if (fromChannel) {
+        fromChannel.voiceParticipants.delete(event.user);
+      }
+      const toChannel = client.channels.getOrPartial(event.to);
+      if (toChannel) {
+        toChannel.voiceParticipants.set(
+          event.state.id,
+          new VoiceParticipant(client, event.state),
+        );
+      }
       break;
     }
     case "UserVoiceStateUpdate": {
