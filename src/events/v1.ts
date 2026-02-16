@@ -123,6 +123,8 @@ type ServerMessage =
       id: string;
       server: Server;
       channels: Channel[];
+      emojis: Emoji[];
+      voice_states: ChannelVoiceState[];
     }
   | {
       type: "ServerUpdate";
@@ -239,17 +241,17 @@ type ChannelVoiceState = {
  * Initial synchronisation packet
  */
 type ReadyData = {
-  users: User[];
-  servers: Server[];
-  channels: Channel[];
-  members: Member[];
-  emojis: Emoji[];
-  voice_states: ChannelVoiceState[];
+  users?: User[];
+  servers?: Server[];
+  channels?: Channel[];
+  members?: Member[];
+  emojis?: Emoji[];
+  voice_states?: ChannelVoiceState[];
 
-  user_settings: Record<string, unknown>;
-  channel_unreads: ChannelUnread[];
+  user_settings?: Record<string, unknown>;
+  channel_unreads?: ChannelUnread[];
 
-  policy_changes: PolicyChange[];
+  policy_changes?: PolicyChange[];
 };
 
 /**
@@ -319,6 +321,7 @@ export async function handleEvent(
             }
           }
         }
+
         if (event.emojis) {
           for (const emoji of event.emojis) {
             client.emojis.getOrCreate(emoji._id, emoji);
@@ -654,6 +657,24 @@ export async function handleEvent(
             client.channels.getOrCreate(channel._id, channel);
           }
 
+          for (const state of event.voice_states) {
+            const channel = client.channels.get(state.id);
+            if (channel) {
+              channel.voiceParticipants.clear();
+
+              for (const participant of state.participants) {
+                channel.voiceParticipants.set(
+                  participant.id,
+                  new VoiceParticipant(client, participant),
+                );
+              }
+            }
+          }
+
+          for (const emoji of event.emojis) {
+            client.emojis.getOrCreate(emoji._id, emoji);
+          }
+
           client.servers.getOrCreate(event.server._id, event.server, true);
         });
       }
@@ -969,7 +990,18 @@ export async function handleEvent(
       break;
     }
     case "VoiceChannelMove": {
-      // todo
+      const from = client.channels.getOrPartial(event.from);
+      if (from) {
+        from.voiceParticipants.delete(event.user);
+      }
+
+      const to = client.channels.getOrPartial(event.to);
+      if (to) {
+        to.voiceParticipants.set(
+          event.state.id,
+          new VoiceParticipant(client, event.state),
+        );
+      }
       break;
     }
     case "UserVoiceStateUpdate": {
