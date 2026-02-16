@@ -164,16 +164,16 @@ export class EventClient<
     // todo: pass-through ts as a configuration option
     // todo: then remove /settings/fetch from web client
     // todo: do the same for unreads
-    // url.searchParams.append("ready", "users");
-    // url.searchParams.append("ready", "servers");
-    // url.searchParams.append("ready", "channels");
-    // url.searchParams.append("ready", "members");
-    // url.searchParams.append("ready", "emojis");
-    // url.searchParams.append("ready", "voice_states");
-    // url.searchParams.append("ready", "user_settings[ordering]");
-    // url.searchParams.append("ready", "user_settings[notifications]");
+    url.searchParams.append("ready", "users");
+    url.searchParams.append("ready", "servers");
+    url.searchParams.append("ready", "channels");
+    url.searchParams.append("ready", "members");
+    url.searchParams.append("ready", "emojis");
+    url.searchParams.append("ready", "voice_states");
+    url.searchParams.append("ready", "user_settings[ordering]");
+    url.searchParams.append("ready", "user_settings[notifications]");
     // url.searchParams.append("ready", "unreads or something");
-    // url.searchParams.append("ready", "policy_changes");
+    url.searchParams.append("ready", "policy_changes");
 
     this.#socket = new WebSocket(url);
 
