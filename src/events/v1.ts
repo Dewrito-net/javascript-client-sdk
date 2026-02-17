@@ -769,6 +769,12 @@ export async function handleEvent(
           }
         }
 
+        // Reset the server's member sync status so the member list will be refreshed
+        const server = client.servers.get(event.id);
+        if (server) {
+          server.resetSyncStatus();
+        }
+
         client.emit(
           "serverMemberJoin",
           client.serverMembers.getOrCreate(id, {
@@ -841,6 +847,12 @@ export async function handleEvent(
         const member = client.serverMembers.getUnderlyingObject(
           id.server + id.user,
         );
+
+        // Reset the server's member sync status so the member list will be refreshed
+        const server = client.servers.get(event.id);
+        if (server) {
+          server.resetSyncStatus();
+        }
 
         client.emit("serverMemberLeave", member);
         client.serverMembers.delete(id.server + id.user);
